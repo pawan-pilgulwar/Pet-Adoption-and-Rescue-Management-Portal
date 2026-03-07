@@ -6,9 +6,9 @@ PET_STATUS_CHOICES = [
 ]
 
 USER_ROLE_CHOICES = [
+    ("SuperAdmin", "SuperAdmin"),
     ("Admin", "Admin"),
     ("User", "User"),
-    ("staff", "Staff"),
 ]
 
 REPORT_STATUS = [

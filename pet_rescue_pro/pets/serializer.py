@@ -8,16 +8,37 @@ from core.constants import PET_STATUS_CHOICES
 import re
 
 class PetSerializer(serializers.ModelSerializer):
-    name = serializers.CharField()
-
 
     created_by = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
 
+    created_by_detail = serializers.StringRelatedField(
+        source="created_by",
+        read_only=True
+    )
+
     class Meta:
         model = Pet
-        fields = '__all__'
+        fields = [
+            "id",
+            "name",
+            "pet_type",
+            "breed",
+            "color",
+            "status",
+            "location",
+            "image",
+            "created_at",
+            "updated_at",
+            "created_by",
+            "created_by_detail"
+        ]
+        extra_kwargs = {
+            "created_at": {"read_only": True},
+            "updated_at": {"read_only": True},
+            "created_by_detail": {"read_only": True}
+        }
 
     def validate_name(self, value):
         if not re.match(r'^[A-Za-z\s]+$', value):
@@ -28,4 +49,5 @@ class PetSerializer(serializers.ModelSerializer):
         if not re.match(r'^[A-Za-z\s]+$', value):
             raise serializers.ValidationError("Pet type must contain only letters.")
         return value
+        
     

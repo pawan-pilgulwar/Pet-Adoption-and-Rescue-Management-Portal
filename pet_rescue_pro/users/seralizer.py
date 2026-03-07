@@ -9,19 +9,38 @@ from core.constants import USER_ROLE_CHOICES
 class UserWriteSerializer(serializers.ModelSerializer):
 
     email = serializers.EmailField(required=True)
-    password = serializers.CharField(write_only=True, required=True, min_length=8)
     username = serializers.CharField(required=True, min_length=5)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
-    role = serializers.ChoiceField(choices=USER_ROLE_CHOICES, default="User")
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "password",
+            "phone_number",
+            "address",
+            "profile_picture",
+            "role",
+            "created_at",
+        ]
+        extra_kwargs = {
+            "password": {"write_only": True},
+            "id": {"read_only": True},
+            "created_at": {"read_only": True},
+            "updated_at": {"read_only": True}
+        }
+
 
     def validate_username(self, value):
         if not re.match(r'^[a-zA-Z0-9_]+$', value):
-            raise serializers.ValidationError("Username can contain only letters, numbers, and underscores")
+            raise serializers.ValidationError(
+                "Username can only contain letters, numbers and underscores."
+            )
         
         qs = User.objects.filter(username=value)
         if self.instance:
@@ -53,16 +72,36 @@ class UserWriteSerializer(serializers.ModelSerializer):
         return value
     
     def create(self, validated_data):
+        validated_data['role'] = "User"
         validated_data['password'] = make_password(validated_data['password'])
         user = super().create(validated_data)
         return user
+    
+    def update(self, instance, validated_data):
+        password = validated_data.get("password", None)
+
+        if password:
+            validated_data["password"] = make_password(password)
+
+        return super().update(instance, validated_data)
     
 
 
 class UserReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        exclude = ['password']
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "address",
+            "profile_picture",
+            "role",
+            "created_at"
+        ]
     
 
 class LoginSerializer(serializers.Serializer):
@@ -88,6 +127,7 @@ class LoginSerializer(serializers.Serializer):
         return {
             "user_id": user.id,
             "username": user.username,
+            "role": user.role,
             "access": str(refresh.access_token),
             "refresh": str(refresh),
         }

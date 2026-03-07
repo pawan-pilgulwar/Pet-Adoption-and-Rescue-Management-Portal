@@ -15,6 +15,7 @@ class User(models.Model):
     address = models.CharField(max_length=200, null=True, blank=True,)
     created_at = models.DateTimeField(auto_now_add=True)
     role = models.CharField(max_length=20, default="User", choices=USER_ROLE_CHOICES)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
     def __str__(self):
