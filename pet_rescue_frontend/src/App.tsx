@@ -1,35 +1,78 @@
 import React from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 
-import Landing from './pages/Landing';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ReportPet from './pages/ReportPet';
+import SearchPets from './pages/SearchPets';
+import UserDashboard from './pages/UserDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import { authService } from './services/api';
+
+// Protected Route Component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const user = authService.getCurrentUser();
+  if (!user) return <Navigate to="/login" />;
+  return <>{children}</>;
+};
+
+// Admin Route Component
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const user = authService.getCurrentUser();
+  if (!user || (user.role !== 'Admin' && user.role !== 'SuperAdmin')) return <Navigate to="/" />;
+  return <>{children}</>;
+};
 
 function App() {
   return (
-    <div className="App text-gray-800">
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between">
-          <Link to="/" className="text-xl font-bold">
-            Pet Rescue
-          </Link>
-          <div className="space-x-4">
-            <Link to="/login" className="text-blue-600 hover:underline">
-              Login
-            </Link>
-            <Link to="/register" className="text-green-600 hover:underline">
-              Register
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="App min-h-screen bg-gray-50">
+      <Navbar />
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/search" element={<SearchPets />} />
 
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Routes>
+          <Route
+            path="/report"
+            element={
+              <ProtectedRoute>
+                <ReportPet />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin-dashboard"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+        </Routes>
+      </main>
+
+      <footer className="bg-white border-t border-gray-100 py-12 mt-20">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-gray-500 text-sm font-medium">
+            &copy; 2026 PetRescue Portal. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

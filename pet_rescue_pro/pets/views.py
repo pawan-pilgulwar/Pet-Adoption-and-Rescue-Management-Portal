@@ -26,7 +26,7 @@ class PetViewSet(viewsets.ModelViewSet, ResponseMixin):
 
     @action(detail=False, methods=['get'], url_path='get', permission_classes=[AllowAny])
     def get_all_pets(self, request, *args, **kwargs):
-        queryset = self.queryset
+        queryset = self.get_queryset()
         print(queryset)
         serializer = self.serializer_class(queryset, many=True)
         return self.success_response(

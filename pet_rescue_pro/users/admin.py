@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, PetReport, Notification
+from .models import User, Notification
 
 
 # Register your models here.
@@ -53,6 +53,5 @@ class UserAdmin(admin.ModelAdmin):
         }),
     )
 
-    
-admin.site.register(PetReport)
+
 admin.site.register(Notification)

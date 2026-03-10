@@ -1,7 +1,7 @@
 import re
 
 from rest_framework import serializers
-from .models import PetReport, User
+from .models import User
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.constants import USER_ROLE_CHOICES     
@@ -131,8 +131,3 @@ class LoginSerializer(serializers.Serializer):
             "access": str(refresh.access_token),
             "refresh": str(refresh),
         }
-
-class PetReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PetReport
-        fields = '__all__'

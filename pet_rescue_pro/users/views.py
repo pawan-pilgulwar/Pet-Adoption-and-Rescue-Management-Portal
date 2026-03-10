@@ -6,8 +6,8 @@ from django.db.models import Q
 from django.contrib.auth.hashers import make_password, check_password
 
 from core.mixins import ResponseMixin
-from .models import PetReport, User
-from .seralizer import PetReportSerializer, UserWriteSerializer, LoginSerializer, UserReadSerializer
+from .models import User
+from .serializer import UserWriteSerializer, LoginSerializer, UserReadSerializer
 from core.permission import IsAdmin, IsSuperAdmin
 
 # Create your views here.
@@ -239,9 +239,4 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
             status_code=status.HTTP_204_NO_CONTENT
         )
 
-
-
-class PetReportViewSet(viewsets.ModelViewSet):
-    queryset = PetReport.objects.all()
-    serializer_class = PetReportSerializer
 
