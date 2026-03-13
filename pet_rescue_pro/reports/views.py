@@ -3,55 +3,119 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from django.contrib.auth.hashers import make_password, check_password
 
 from core.mixins import ResponseMixin
 from .models import PetReport
-from .serializer import PetReportSerializer
-from core.permission import IsAdmin, IsSuperAdmin
+from .serializer import PetReportSerializer, PetReportCreateSerializer
+from core.permission import IsAdmin, IsUser
 
 # Create your views here.
 class PetReportViewSet(viewsets.ModelViewSet, ResponseMixin):
     queryset = PetReport.objects.all()
     serializer_class = PetReportSerializer
 
-    @action(detail=False, methods=['get'], url_path='get-all', permission_classes=[IsAuthenticated, IsAdmin | IsSuperAdmin])
-    def get_all_reports(self, request, *args, **kwargs):
-        queryset = self.get_queryset().filter(reviewed_by=request.user.id)
-        serializer = self.serializer_class(queryset, many=True)
+    def get_serializer_class(self):
+        if self.action == 'create_report':
+            return PetReportCreateSerializer
+        return PetReportSerializer
+
+
+    # Get all user reports
+    @action(detail=False, methods=['get'], url_path='get-user-reports', permission_classes=[IsAuthenticated | IsUser])
+    def get_user_reports(self, request, *args, **kwargs):
+        queryset = self.get_queryset().filter(user=request.user)
+        serializer = self.get_serializer(queryset, many=True)
         return self.success_response(
             data={
                 "Count": queryset.count(),
                 "Reports": serializer.data
             },
-            message="Reports by the admin user are fetched successfully",
+            message="User Reports fetched successfully",
             status_code = status.HTTP_200_OK
         )
 
-
-    @action(detail=True, methods=['get'], url_path='get-report', permission_classes=[IsAuthenticated, IsAdmin | IsSuperAdmin])
+    # Get a single report
+    @action(detail=True, methods=['get'], url_path='get-report', permission_classes=[IsAuthenticated])
     def get_report(self, request, *args, **kwargs):
-        pk = kwargs['pk']
-        report = PetReport.objects.get(pk=pk)
-        serializer = self.serializer_class(report)
+        report = self.get_object()
+        serializer = self.get_serializer(report)
         return self.success_response(
             data=serializer.data,
-            message="Report is fetched successfully",
+            message="Report fetched successfully",
             status_code = status.HTTP_200_OK
         )
 
-    @action(detail=False, methods=['post'], url_path='create-report', permission_classes=[IsAuthenticated, IsAdmin | IsSuperAdmin])
+    # Delete the report
+    @action(detail=True, methods=['delete'], url_path='delete-report', permission_classes=[IsAuthenticated, IsUser])
+    def delete_report(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.user != request.user:
+            return self.error_response(
+                message="You can only delete your own report.",
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+        
+        instance.delete()
+        return self.success_response(
+            data={"deleted_report_id": instance.id},
+            message="Report deleted successfully",
+            status_code=status.HTTP_204_NO_CONTENT
+        )
+    
+    # Generate the report
+    @action(detail=False, methods=['post'], url_path='create-report', permission_classes=[IsAuthenticated , IsUser])
     def create_report(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return self.success_response(
             data=serializer.data,
-            message="Report created successfully",
+            message="Pet and Report created successfully",
             status_code = status.HTTP_201_CREATED
         )
+    
 
-    @action(detail=True, methods=['put', 'patch'], url_path='update-report', permission_classes=[IsAuthenticated, IsAdmin | IsSuperAdmin])
+    # See all reports to find pet
+    @action(detail=False, methods=['get'], url_path='all-reports', permission_classes=[IsAuthenticated])
+    def all_reports(self, request, *args, **kwargs):
+        queryset = self.queryset.exclude(user=request.user).filter(status="Accepted")
+        serializer = self.get_serializer(queryset, many=True)
+
+        return self.success_response(
+            data={
+                "Count": queryset.count(),
+                "Reports": serializer.data
+            },
+            message="Reports fetched successfully",
+            status_code = status.HTTP_200_OK
+        )
+    
+    
+    
+
+
+# ---------------    ADMIN VIEWS     -------------
+
+    # Get all reports only for admin
+    @action(detail=False, methods=['get'], url_path='admin-get-all', permission_classes=[IsAuthenticated, IsAdmin])
+    def get_all_reports(self, request, *args, **kwargs):
+        # Admins see all reports, or we can filter by reviewer if needed. 
+        # Requirement: Admin must be able to list reports and update status.
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return self.success_response(
+            data={
+                "Count": queryset.count(),
+                "Reports": serializer.data
+            },
+            message="Reports fetched successfully",
+            status_code = status.HTTP_200_OK
+        )
+
+
+    # Update the report
+    @action(detail=True, methods=['put', 'patch'], url_path='admin-update-report', permission_classes=[IsAuthenticated, IsAdmin])
     def update_report(self, request, *args, **kwargs):
         partial = request.method == "PATCH"
         instance = self.get_object()
@@ -64,12 +128,7 @@ class PetReportViewSet(viewsets.ModelViewSet, ResponseMixin):
             status_code=status.HTTP_202_ACCEPTED
         )
 
-    @action(detail=True, methods=['delete'], url_path='delete-report', permission_classes=[IsAuthenticated, IsSuperAdmin])
-    def delete_report(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.delete()
-        return self.success_response(
-            data={"deleted_report_id": instance.id},
-            message="Report deleted successfully",
-            status_code=status.HTTP_204_NO_CONTENT
-        )
+
+
+
+

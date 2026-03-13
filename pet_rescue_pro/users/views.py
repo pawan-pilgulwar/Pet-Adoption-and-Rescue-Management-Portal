@@ -8,12 +8,14 @@ from django.contrib.auth.hashers import make_password, check_password
 from core.mixins import ResponseMixin
 from .models import User
 from .serializer import UserWriteSerializer, LoginSerializer, UserReadSerializer
-from core.permission import IsAdmin, IsSuperAdmin
+from core.permission import IsAdmin
+from reports.models import PetReport
+from pets.models import Pet 
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
     queryset = User.objects.all()   
-    serializer_class = UserWriteSerializer
+    serializer_class = UserReadSerializer
 
     #  NEW LOOKUP LOGIC
     def get_object(self):
@@ -24,10 +26,17 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
             Q(username=lookup) | Q(email=lookup) | Q(id=lookup)
         )
 
+    def get_serializer_class(self):
+        if self.action == 'login' and self.request.method == 'POST':
+            return LoginSerializer
+        elif self.request.method == 'POST' or self.request.method == 'PUT' or self.request.method == 'PATCH':
+            return UserWriteSerializer
+        return UserReadSerializer
+
     
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer = UserReadSerializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
 
         return self.success_response(
             data={
@@ -41,7 +50,7 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
 
     @action(detail=False, methods=['get'], url_path='me', permission_classes=[IsAuthenticated])
     def get_user(self, request, *args, **kwargs):
-        serializer = UserReadSerializer(request.user, context={"request": request})
+        serializer = self.get_serializer(request.user, context={"request": request})
         return self.success_response(
             data = serializer.data,
             message="User fetched successfully",
@@ -63,7 +72,7 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
 
     @action(detail=False, methods=['post'], url_path='login', permission_classes=[AllowAny])
     def login(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return self.success_response(
             data=serializer.validated_data,
@@ -94,9 +103,16 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
         )
     
 
-    @action(detail=True, methods=['delete'], url_path='delete-user', permission_classes=[IsAdmin | IsAuthenticated])
+    @action(detail=True, methods=['delete'], url_path='delete-user', permission_classes=[IsAuthenticated])
     def delete_user(self, request, *args, **kwargs):
         instance = self.get_object()
+
+        if instance != request.user:
+            return self.error_response(
+                message="You can only delete your own account.",
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+
         instance.delete()
         return self.success_response(
             data={"deleted_user_id": instance.id},
@@ -146,25 +162,19 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
 
 
 
-    # ---------------    ADMIN ROUTES     -------------
+    # ---------------    ADMIN VIEWS     -------------
 
-    @action(detail=False, methods=['get'], url_path='admin-dashboard', permission_classes=[IsAdmin | IsSuperAdmin] )
+    @action(detail=False, methods=['get'], url_path='admin-dashboard', permission_classes=[IsAdmin] )
     def admin_dashboard(self, request):
         total_users = User.objects.filter(role ="User").count()
         total_reports = PetReport.objects.count()
-
-        total_admin_users = None
-
-        if request.user.role == "SuperAdmin":
-            total_admin_users = User.objects.filter(role="Admin").count()
+        total_pets = Pet.objects.count()
 
         data = {
             "total_users": total_users,
             "total_reports": total_reports,
+            "total_pets": total_pets,
         }
-
-        if total_admin_users is not None:
-            data["total_admin_users"] = total_admin_users
 
         return self.success_response(
             data=data,
@@ -172,26 +182,26 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
             status_code=status.HTTP_200_OK
         )
     
-    @action( detail=False, methods=['get'], url_path='admin-users', permission_classes=[IsAdmin | IsSuperAdmin] )
+    @action( detail=False, methods=['get'], url_path='admin-users', permission_classes=[IsAdmin] )
     def admin_users(self, request):
 
-        if request.user.role == "SuperAdmin":
-            users = User.objects.exclude(id=request.user.id)
+        if request.user.role == "Admin":
+            queryset = self.queryset.exclude(id=request.user.id)
         else:
-            users = User.objects.filter(role="User")
+            queryset = self.queryset.filter(role="User")
     
-        serializer = UserReadSerializer(users, many=True)
+        serializer = self.get_serializer(queryset, many=True)
 
         return self.success_response(
             data={
-                "count": users.count(),
+                "count": queryset.count(),
                 "users": serializer.data
             },
             message="All users fetched successfully",
             status_code=status.HTTP_200_OK
         )
     
-    @action(detail=True, methods=['delete'], url_path='admin-delete-user', permission_classes=[IsSuperAdmin])
+    @action(detail=True, methods=['delete'], url_path='admin-delete-user', permission_classes=[IsAdmin])
     def admin_delete_user(self, request, pk=None):
         user = self.get_object()
         user.delete()
@@ -199,43 +209,6 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
         return self.success_response(
             data={"deleted_user_id": pk},
             message="User deleted by admin",
-            status_code=status.HTTP_204_NO_CONTENT
-        )
-    
-    @action(detail=True, methods=['patch'], url_path='promote-user', permission_classes=[IsSuperAdmin])
-    def promote_user(self, request, pk=None):
-        user = self.get_object()
-        user.role = "Admin"
-        user.save()
-
-        return self.success_response(
-            data={"user_id": user.id, "role": user.role},
-            message="User promoted to admin",
-            status_code=status.HTTP_200_OK
-        )
-    
-    @action(detail=False, methods=['get'], url_path='admin-pet-reports', permission_classes=[IsAdmin])
-    def admin_pet_reports(self, request):
-        reports = PetReport.objects.all()
-        serializer = PetReportSerializer(reports, many=True)
-
-        return self.success_response(
-            data={
-                "count": reports.count(),
-                "reports": serializer.data
-            },
-            message="Pet reports fetched successfully",
-            status_code=status.HTTP_200_OK
-        )
-    
-    @action(detail=True, methods=['delete'], url_path='admin-delete-report', permission_classes=[IsAdmin])
-    def admin_delete_report(self, request, pk=None):
-        report = get_object_or_404(PetReport, id=pk)
-        report.delete()
-
-        return self.success_response(
-            data={"deleted_report_id": pk},
-            message="Pet report deleted successfully",
             status_code=status.HTTP_204_NO_CONTENT
         )
 

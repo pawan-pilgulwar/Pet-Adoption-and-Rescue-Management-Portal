@@ -1,58 +1,76 @@
 from rest_framework import serializers
 from .models import PetReport
-from rest_framework_simplejwt.tokens import RefreshToken   
+from pets.models import Pet
+from pets.serializer import PetSerializer
 
-
-from core.constants import PET_STATUS_CHOICES
-import re
 
 class PetReportSerializer(serializers.ModelSerializer):
 
-    reviewed_by = serializers.HiddenField(
+    user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
 
-    reviewed_by_detail = serializers.StringRelatedField(
-        source="reviewed_by",
+    user_detail = serializers.StringRelatedField(
+        source="user",
         read_only=True
     )
 
-    pet_detail = serializers.StringRelatedField(
-        source = "pet",
-        read_only = True
+    pet_detail = PetSerializer(
+        source="pet",
+        read_only=True
     )
 
     class Meta:
         model = PetReport
         fields = [
             "id",
+            "user",
+            "user_detail",
+            "pet",
             "pet_detail",
+            "location",
+            "description",
             "admin_comment",
-            "report_status",
-            "reviewed_by",
             "created_at",
             "reviewed_at",
-            "reviewed_by_detail"
+            "status"
         ]
-        extra_kwargs = {
-            "created_at": {"read_only": True},
-            "updated_at": {"read_only": True},
-            "created_by_detail": {"read_only": True}
-        }
+        read_only_fields = [
+            "created_at",
+            "reviewed_at",
+            "admin_comment",
+        ]
 
-    def validate_name(self, value):
-        if not re.match(r'^[A-Za-z\s]+$', value):
-            raise serializers.ValidationError("Name must contain only letters.")
-        return value
-    
-    def validate_pet_type(self, value):
-        if not re.match(r'^[A-Za-z\s]+$', value):
-            raise serializers.ValidationError("Pet type must contain only letters.")
-        return value
 
-    def validate_report_status(self, value):
-        if value not in ["pending", "approved", "rejected"]:
-            raise serializers.ValidationError("Invalid report status.")
-        return value
-    
+class PetReportCreateSerializer(serializers.ModelSerializer):
+    pet_data = PetSerializer(write_only=True)
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        model = PetReport
+        fields = [
+            "user",
+            "pet_data",
+            "location",
+            "description",
+            "admin_comment",
+            "status"
+        ]
+        read_only_fields = [
+            "admin_comment",
+            "status"
+        ]
+
+    def create(self, validated_data):
+        pet_data = validated_data.pop('pet_data')
+        # Assign the user who reported as the one who 'created' the pet object initially
+        user = self.context['request'].user
+        pet_data['created_by'] = user
+        pet = Pet.objects.create(**pet_data)
+        
+        report = PetReport.objects.create(pet=pet, **validated_data)
+        return report
+
 

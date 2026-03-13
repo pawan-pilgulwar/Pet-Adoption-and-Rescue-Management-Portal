@@ -4,7 +4,6 @@ from rest_framework_simplejwt.tokens import AccessToken
 from users.models import User
 
 class CustomJWTAuthentication(BaseAuthentication):
-
     def authenticate(self, request):
         auth_header = request.headers.get('Authorization')
 

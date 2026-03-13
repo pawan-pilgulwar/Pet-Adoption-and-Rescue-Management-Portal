@@ -87,9 +87,9 @@ WSGI_APPLICATION = 'pet_rescue_pro.wsgi.application'
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB', 'your_postgres_db_name'),
-#         'USER': os.getenv('POSTGRES_USER', 'your_postgres_USER_NAME'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'your_postgres_PASSWORD'),
+#         'NAME': os.getenv('POSTGRES_DB', 'pet_rescue_pro'),
+#         'USER': os.getenv('POSTGRES_USER', 'postgres'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
 #         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),  # Or the IP address of your PostgreSQL server
 #         'PORT': os.getenv('POSTGRES_PORT', '5432'),        # Or the port your PostgreSQL server is listening on
 #     }

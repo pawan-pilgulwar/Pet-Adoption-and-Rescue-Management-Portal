@@ -1,33 +1,26 @@
 from rest_framework import viewsets, status
-from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Pet
 from .serializer import PetSerializer
 from core.mixins import ResponseMixin
-from core.permission import IsAdmin
+from core.permissions import IsAdmin
 
 # Create your views here.
 class PetViewSet(viewsets.ModelViewSet, ResponseMixin):
-    queryset = Pet.objects.all()
+    queryset = Pet.objects.all().exclude(status='Found' | 'Lost')
     serializer_class = PetSerializer
 
-    #  NEW LOOKUP LOGIC
-    # def get_object(self):
-    #     lookup = self.kwargs.get("lookup")
-    #     queryset = self.get_queryset()
-    #     return get_object_or_404(
-    #         queryset,
-    #         Q(username=lookup) | Q(email=lookup) | Q(id=lookup)
-    #     )
-
-    @action(detail=False, methods=['get'], url_path='get', permission_classes=[AllowAny])
+    @action(detail=False, methods=['get'], url_path='all-pets', permission_classes=[IsAuthenticated])
     def get_all_pets(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        print(queryset)
+        # Only show pets whose report status is Accepted
+        status_param = request.query_params.get('status')
+        queryset = Pet.objects.filter(status='Available')
+        
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+            
         serializer = self.serializer_class(queryset, many=True)
         return self.success_response(
             data={
@@ -38,7 +31,7 @@ class PetViewSet(viewsets.ModelViewSet, ResponseMixin):
             status_code = status.HTTP_200_OK
         )
     
-    @action(detail=True, methods=['get'], url_path="pet-detail", permission_classes=[AllowAny])
+    @action(detail=True, methods=['get'], url_path="pet-detail", permission_classes=[IsAuthenticated])
     def get_pet_detail(self, request, *args, **kwargs):
         pet = self.get_object()
         serializer = self.get_serializer(pet)
@@ -48,7 +41,24 @@ class PetViewSet(viewsets.ModelViewSet, ResponseMixin):
             status_code = status.HTTP_200_OK
         )
     
-    @action(detail=False, methods=['post'], url_path="register-pet", permission_classes=[IsAuthenticated])
+
+
+    # ---------------    Admin Views     -----------------------
+
+    @action(detail=False, methods=['get'], url_path='admin-all-pets', permission_classes=[IsAuthenticated, IsAdmin])
+    def get_all_pets_admin(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return self.success_response(
+            data={
+                "count": queryset.count(),
+                "Pets": serializer.data
+            },
+            message="Pets fetched successfully",
+            status_code = status.HTTP_200_OK
+        )
+    
+    @action(detail=False, methods=['post'], url_path="admin-register-pet", permission_classes=[IsAuthenticated, IsAdmin])
     def register_pet(self, request, *args, **kwrags):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception = True)
@@ -59,7 +69,7 @@ class PetViewSet(viewsets.ModelViewSet, ResponseMixin):
             status_code = status.HTTP_201_CREATED
         )
     
-    @action(detail=True, methods=['put', 'patch'], url_path='update-pet', permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['put', 'patch'], url_path='admin-update-pet', permission_classes=[IsAuthenticated, IsAdmin])
     def update_pet(self, request, *args, **kwrags):
         partial = request.method == "PATCH"
         instance = self.get_object()
@@ -72,7 +82,7 @@ class PetViewSet(viewsets.ModelViewSet, ResponseMixin):
             status_code=status.HTTP_202_ACCEPTED
         )
     
-    @action(detail=True, methods=['delete'], url_path='delete-pet', permission_classes=[IsAdmin | IsAuthenticated])
+    @action(detail=True, methods=['delete'], url_path='admin-delete-pet', permission_classes=[IsAuthenticated, IsAdmin])
     def delete_pet(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.delete()

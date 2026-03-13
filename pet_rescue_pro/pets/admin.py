@@ -15,10 +15,13 @@ class PetAdmin(admin.ModelAdmin):
         "id",
         "name",
         "pet_type",
+        "color",
+        "breed",
         "status",
-        "location",
         "image_preview",
         "created_by",
+        "created_at",
+        "updated_at"
     )
 
     def image_preview(self, obj):
@@ -32,10 +35,10 @@ class PetAdmin(admin.ModelAdmin):
     image_preview.short_description = "Image"
 
     # Add search bar
-    search_fields = ("name", "breed", "location")
+    search_fields = ("name", "breed", "color")
 
     # Add filter sidebar
-    list_filter = ("status", "pet_type", "breed")
+    list_filter = ("pet_type", "breed", "status")
 
     # Order by latest
     ordering = ("-id",)
