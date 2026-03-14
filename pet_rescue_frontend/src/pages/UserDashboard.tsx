@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { petService, authService } from '../services/api';
+import { reportService, authService } from '../services/api';
 import DashboardTable from '../components/DashboardTable';
 
 const UserDashboard: React.FC = () => {
@@ -8,21 +8,26 @@ const UserDashboard: React.FC = () => {
     const user = authService.getCurrentUser();
 
     useEffect(() => {
-        fetchUserPets();
+        fetchUserReports();
     }, []);
 
-    const fetchUserPets = async () => {
+    const fetchUserReports = async () => {
         try {
-            // In a real app, we'd filter by user ID on the backend
-            // For this prototype, we'll fetch all and filter locally if needed
-            const response = await petService.getAll();
-            const allPets = response.data.Pets;
-            console.log(response)
-            // Filtering pets created by current user if backend doesn't provide a specific endpoint
-            const userPets = allPets.filter((p: any) => p.created_by_detail === user?.username);
-            setPets(userPets);
+            const response = await reportService.getUserReports();
+            
+            // Map the reports to format suitable for DashboardTable
+            const formattedReports = response.data?.Reports?.map((report: any) => ({
+                id: report.id,
+                name: report.pet_detail?.name || 'Unknown',
+                pet_type: report.pet_detail?.pet_type || 'Unknown',
+                breed: report.pet_detail?.breed || 'Unknown',
+                status: report.status, // Show report status instead of pet status
+                location: report.location
+            })) || [];
+
+            setPets(formattedReports);
         } catch (error) {
-            console.error('Error fetching user pets:', error);
+            console.error('Error fetching user reports:', error);
         } finally {
             setLoading(false);
         }
@@ -31,8 +36,8 @@ const UserDashboard: React.FC = () => {
     const handleDelete = async (id: number) => {
         if (window.confirm('Are you sure you want to delete this pet report?')) {
             try {
-                await petService.delete(id);
-                fetchUserPets();
+                await reportService.delete(id);
+                fetchUserReports();
             } catch (error) {
                 alert('Failed to delete report');
             }

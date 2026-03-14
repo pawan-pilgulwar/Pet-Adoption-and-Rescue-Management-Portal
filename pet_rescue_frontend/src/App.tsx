@@ -7,9 +7,11 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ReportPet from './pages/ReportPet';
-import SearchPets from './pages/SearchPets';
 import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import Adoption from './pages/Adoption';
+import Rescue from './pages/Rescue';
+import Profile from './pages/Profile';
 import { authService } from './services/api';
 
 // Protected Route Component
@@ -35,7 +37,24 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/search" element={<SearchPets />} />
+
+          <Route
+            path="/adoption"
+            element={
+              <ProtectedRoute>
+                <Adoption />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/rescue"
+            element={
+              <ProtectedRoute>
+                <Rescue />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/report"
@@ -51,6 +70,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

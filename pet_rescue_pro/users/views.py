@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password, check_password
+import os
 
 from core.mixins import ResponseMixin
 from .models import User
@@ -74,11 +75,34 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
     def login(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return self.success_response(
+
+        response = self.success_response(
             data=serializer.validated_data,
             message="Login successful",
             status_code=status.HTTP_200_OK
         )
+
+        response.set_cookie(
+            key="access_token",
+            value = serializer.validated_data['access'],
+            httponly=True,
+            secure=os.getenv('ENVIRONMENT')!='development',
+            samesite="Lax",
+            max_age=3600
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value = serializer.validated_data['refresh'],
+            httponly=True,
+            secure=os.getenv('ENVIRONMENT')!='development',
+            samesite="Lax",
+            max_age=86400
+        )
+
+        print(response.cookies)
+
+        return response
         
 
     @action(detail=True, methods=['put', 'patch'], url_path='update-user', permission_classes=[IsAuthenticated])

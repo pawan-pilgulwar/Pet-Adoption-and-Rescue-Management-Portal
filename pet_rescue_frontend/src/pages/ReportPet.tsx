@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PetForm from '../components/PetForm';
-import { petService } from '../services/api';
+import { reportService } from '../services/api';
 
 const ReportPet: React.FC = () => {
     const navigate = useNavigate();
@@ -9,8 +9,21 @@ const ReportPet: React.FC = () => {
 
     const handleSubmit = async (formData: any) => {
         try {
-            await petService.register(formData);
-            navigate('/dashboard');
+            // Reformat payload according to backend PetReportCreateSerializer structure
+            const payload = {
+                pet_data: {
+                    name: formData.name || 'Unknown',
+                    pet_type: formData.pet_type,
+                    breed: formData.breed,
+                    color: formData.color,
+                    status: formData.status,
+                },
+                location: formData.location,
+                description: formData.description || '',
+            };
+
+            await reportService.create(payload);
+            navigate('/rescue'); // Redirect to Rescue page where verifed reports show up
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to report pet. Please try again.');
         }

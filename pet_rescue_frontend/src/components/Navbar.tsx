@@ -25,11 +25,11 @@ const Navbar: React.FC = () => {
                             <Link to="/" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
                                 Home
                             </Link>
-                            <Link to="/search" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
-                                Search
+                            <Link to="/adoption" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                                Pet Adoption
                             </Link>
-                            <Link to="/report" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
-                                Report Pet
+                            <Link to="/rescue" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                                Rescue (Lost/Found)
                             </Link>
                         </div>
                     </div>
@@ -45,6 +45,12 @@ const Navbar: React.FC = () => {
                                     className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium"
                                 >
                                     Dashboard
+                                </Link>
+                                <Link
+                                    to="/profile"
+                                    className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium"
+                                >
+                                    Profile
                                 </Link>
                                 <button
                                     onClick={handleLogout}

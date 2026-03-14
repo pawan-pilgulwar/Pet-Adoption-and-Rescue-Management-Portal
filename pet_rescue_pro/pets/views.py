@@ -1,15 +1,16 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
 
 from .models import Pet
 from .serializer import PetSerializer
 from core.mixins import ResponseMixin
-from core.permissions import IsAdmin
+from core.permission import IsAdmin
 
 # Create your views here.
 class PetViewSet(viewsets.ModelViewSet, ResponseMixin):
-    queryset = Pet.objects.all().exclude(status='Found' | 'Lost')
+    queryset = Pet.objects.all().exclude(Q(status='Found') | Q(status='Lost'))
     serializer_class = PetSerializer
 
     @action(detail=False, methods=['get'], url_path='all-pets', permission_classes=[IsAuthenticated])

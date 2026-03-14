@@ -15,15 +15,35 @@ const AdminDashboard: React.FC = () => {
         try {
             const [statsRes, reportsRes] = await Promise.all([
                 adminService.getStats(),
-                adminService.getReports()
+                reportService.adminGetAll()
             ]);
             setStats(statsRes.data);
-            setReports(reportsRes.data.reports);
-            console.log(reportsRes.data.reports);
+            
+            // Format reports for the dashboard table
+            const formattedReports = (reportsRes.data.Reports || []).map((report: any) => ({
+                id: report.id,
+                pet_name: report.pet_detail?.name || 'Unknown',
+                reporter_name: report.user_detail || 'Unknown User',
+                status: report.status,
+                created_at: report.created_at,
+            }));
+            
+            setReports(formattedReports);
         } catch (error) {
             console.error('Error fetching admin data:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleUpdateStatus = async (id: number, newStatus: string) => {
+        try {
+            await reportService.adminUpdate(id, { status: newStatus });
+            // Refresh data after update
+            fetchAdminData();
+        } catch (error) {
+            console.error(`Error updating report status to ${newStatus}:`, error);
+            alert(`Failed to update report status`);
         }
     };
 
@@ -59,24 +79,45 @@ const AdminDashboard: React.FC = () => {
                         </div>
                     ) : (
                         <DashboardTable
-                            headers={['ID', 'Pet Name', 'Owner', 'Status', 'Date', 'Actions']}
+                            headers={['ID', 'Pet Name', 'Reporter', 'Status', 'Date', 'Actions']}
                             data={reports}
                             renderRow={(report) => (
                                 <tr key={report.id} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{report.id}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{report.pet_name || 'N/A'}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.reporter_name || 'User'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{report.pet_name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.reporter_name}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">
-                                            Pending
+                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                            report.status === 'Accepted' ? 'bg-green-100 text-green-700' :
+                                            report.status === 'Rejected' ? 'bg-red-100 text-red-700' :
+                                            'bg-yellow-100 text-yellow-700'
+                                        }`}>
+                                            {report.status}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {new Date(report.created_at).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button className="text-blue-600 hover:text-blue-900 mr-4 font-bold">Approve</button>
-                                        <button className="text-red-600 hover:text-red-900 font-bold">Reject</button>
+                                        {report.status === 'Pending' && (
+                                            <>
+                                                <button 
+                                                    onClick={() => handleUpdateStatus(report.id, 'Accepted')}
+                                                    className="text-blue-600 hover:text-blue-900 mr-4 font-bold"
+                                                >
+                                                    Approve
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleUpdateStatus(report.id, 'Rejected')}
+                                                    className="text-red-600 hover:text-red-900 font-bold"
+                                                >
+                                                    Reject
+                                                </button>
+                                            </>
+                                        )}
+                                        {report.status !== 'Pending' && (
+                                            <span className="text-gray-400 italic">No actions available</span>
+                                        )}
                                     </td>
                                 </tr>
                             )}
