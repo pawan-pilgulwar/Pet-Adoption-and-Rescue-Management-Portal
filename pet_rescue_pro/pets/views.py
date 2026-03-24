@@ -106,8 +106,8 @@ class PetViewSet(viewsets.ModelViewSet, ResponseMixin):
             Notification.objects.create(
                 user=user,
                 notification_type="Pet_Registration",
-                message=f"New pet registered by {pet.user.username} for {pet.pet_name}",
-                related_object=pet
+                message=f"New pet registered by {pet.created_by.username} for {pet.name}",
+                pet=pet
             )
 
         return self.success_response(

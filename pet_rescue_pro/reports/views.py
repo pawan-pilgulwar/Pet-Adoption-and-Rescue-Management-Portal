@@ -76,9 +76,9 @@ class PetReportViewSet(viewsets.ModelViewSet, ResponseMixin):
         for admin in admins:
             Notification.objects.create(
                 user=admin,
+                report=report,
                 notification_type="Report_Creation",
                 message=f"New report created by {report.user.username} for {report.pet_name}",
-                related_object=report
             )
 
         return self.success_response(
