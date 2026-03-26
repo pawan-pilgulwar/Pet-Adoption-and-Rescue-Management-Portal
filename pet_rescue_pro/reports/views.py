@@ -10,6 +10,7 @@ from .serializer import PetReportSerializer, PetReportCreateSerializer
 from core.permission import IsAdmin, IsUser
 from notifications.models import Notification
 from users.models import User
+from .utils import find_matches
 
 # Create your views here.
 class PetReportViewSet(viewsets.ModelViewSet, ResponseMixin):
@@ -81,6 +82,9 @@ class PetReportViewSet(viewsets.ModelViewSet, ResponseMixin):
                 message=f"New report created by {report.user.username} for {report.pet_name}",
             )
 
+        # Automatically search for matches
+        find_matches(report)
+
         return self.success_response(
             data=serializer.data,
             message="Pet and Report created successfully",
@@ -115,16 +119,16 @@ class PetReportViewSet(viewsets.ModelViewSet, ResponseMixin):
 
         # Apply filters dynamically
         if pet_type:
-            queryset = queryset.filter(pet__pet_type__icontains=pet_type)
+            queryset = queryset.filter(pet_type__icontains=pet_type)
 
         if breed:
-            queryset = queryset.filter(pet__breed__icontains=breed)
+            queryset = queryset.filter(pet_breed__icontains=breed)
 
         if location:
-            queryset = queryset.filter(pet__location__icontains=location)
+            queryset = queryset.filter(location__icontains=location)
 
         if color:
-            queryset = queryset.filter(pet__color__icontains=color)
+            queryset = queryset.filter(pet_color__icontains=color)
 
         serializer = self.get_serializer(queryset, many=True)
 
@@ -173,27 +177,13 @@ class PetReportViewSet(viewsets.ModelViewSet, ResponseMixin):
         report = serializer.save()
 
         if old_status != report.status:
-            if report.status == "Accepted":
-                Notification.objects.create(
-                    user=report.user,
-                    notification_type="Report_Status",
-                    message=f"Report status changed from {old_status} to {report.status}",
-                    related_object=report
-                )
-            elif report.status == "Rejected":
-                Notification.objects.create(
-                    user=report.user,
-                    notification_type="Report_Status",
-                    message=f"Report status changed from {old_status} to {report.status}",
-                    related_object=report
-                )
-            elif report.status == "Closed":
-                Notification.objects.create(
-                    user=report.user,
-                    notification_type="Report_Status",
-                    message=f"Report status changed from {old_status} to {report.status}",
-                    related_object=report
-                )
+            Notification.objects.create(
+                user=report.user,
+                report=report,
+                notification_type="Report_Status",
+                title="Report Status Updated",
+                message=f"Your report for {report.pet_name} has been updated from {old_status} to {report.status}.",
+            )
 
         return self.success_response(
             data=serializer.data,

@@ -11,6 +11,18 @@ class NotificationViewSet(viewsets.ModelViewSet, ResponseMixin):
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return self.success_response(
+            data={
+                "Count": queryset.count(),
+                "Notifications": serializer.data
+            },
+            message="Notifications fetched successfully",
+            status_code=status.HTTP_200_OK
+        )
+
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
 

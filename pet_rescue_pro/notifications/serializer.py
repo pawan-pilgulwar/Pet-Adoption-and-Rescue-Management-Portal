@@ -20,4 +20,4 @@ class NotificationSerializer(serializers.ModelSerializer):
         return obj.pet.name
     
     def get_report(self, obj):
-        return obj.report.title
+        return obj.report.pet_name if obj.report else None
