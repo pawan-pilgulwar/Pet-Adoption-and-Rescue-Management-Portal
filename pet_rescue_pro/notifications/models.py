@@ -1,6 +1,6 @@
 from django.db import models
 from users.models import User
-from pets.models import Pet
+from adoptions.models import Pet
 from reports.models import PetReport
 from core.constants import NOTIFICATION_TYPE_CHOICES
 

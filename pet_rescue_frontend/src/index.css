@@ -3,22 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --primary: #2563eb;
-  --secondary: #4f46e5;
+  --primary: #F97316;
+  --primary-dark: #EA580C;
+  --cream: #FFFBF5;
+  --dark: #1E293B;
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    'Oxygen', 'Ubuntu', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  background-color: var(--cream);
+  color: #334155;
 }
 
 /* Custom Scrollbar */
@@ -27,21 +25,21 @@ code {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #fef3c7;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #fdba74;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #fb923c;
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -59,10 +57,35 @@ code {
   animation: float 4s ease-in-out infinite;
 }
 
-.glass-card {
-  @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-xl;
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600;
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+/* PawPal card hover */
+.card-hover {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.card-hover:hover {
+  @apply -translate-y-1 shadow-xl;
+}
+
+/* Section padding helper */
+.section-padding {
+  @apply py-16 md:py-20 px-4;
+}
+
+/* Gradient text */
+.text-gradient-orange {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500;
+}
+
+/* Glass card */
+.glass-card {
+  @apply bg-white/80 backdrop-blur-lg border border-white/30 shadow-lg;
 }

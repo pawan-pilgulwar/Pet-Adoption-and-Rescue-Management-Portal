@@ -11,7 +11,7 @@ from .models import User
 from .serializer import UserWriteSerializer, LoginSerializer, UserReadSerializer
 from core.permission import IsAdmin
 from reports.models import PetReport
-from pets.models import Pet 
+from adoptions.models import Pet 
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet, ResponseMixin):

@@ -1,112 +1,239 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/logo.png';
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
+import { Pet } from '../types';
+import PetCard from '../components/PetCard';
 
 const Home: React.FC = () => {
+  const { user } = useAuth();
+  const [featuredPets, setFeaturedPets] = useState<Pet[]>([]);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await api.get('/pets/all-pets/');
+        // Show first 3 pets as featured
+        setFeaturedPets((res.data.data.Pets || []).slice(0, 3));
+      } catch (err) {
+        // User might not be logged in, that's okay
+      }
+    };
+    if (user) {
+      fetchFeatured();
+    }
+  }, [user]);
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-white pt-24 pb-32">
-        <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 blur-3xl opacity-20">
-          <div className="h-96 w-96 rounded-full bg-blue-600"></div>
+    <div>
+      {/* ===== Hero Section ===== */}
+      <section className="relative bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 text-8xl">🐾</div>
+          <div className="absolute top-32 right-20 text-6xl">🐕</div>
+          <div className="absolute bottom-20 left-1/3 text-7xl">🐈</div>
+          <div className="absolute bottom-10 right-10 text-5xl">🐾</div>
         </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="flex justify-center mb-8">
-              <img src={logo} alt="PetRescue Logo" className="h-24 w-auto animate-float" />
-            </div>
-            <h1 className="text-6xl font-black text-gray-900 mb-8 tracking-tight leading-tight">
-              Giving Every Pet a <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                Second Chance
-              </span>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
+          <div className="max-w-2xl">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
+              Find Your Perfect
+              <br />
+              <span className="text-amber-200">Furry Companion</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-12 leading-relaxed max-w-2xl mx-auto font-medium">
-              Join our community dedicated to reuniting lost pets with their families and finding loving homes for every animal in need.
+            <p className="text-lg text-white/90 mb-8 leading-relaxed max-w-lg">
+              Adopt a loving pet or help reunite lost animals with their families.
+              Every pet deserves a happy home.
             </p>
-            
-            <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <Link 
-                to="/adoption" 
-                className="px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all transform hover:-translate-y-1 active:scale-95"
+            <div className="flex flex-wrap gap-4">
+              <Link
+                to="/adoption"
+                className="px-8 py-3.5 bg-white text-orange-600 font-bold rounded-full hover:bg-orange-50 transition-all shadow-lg shadow-black/10 text-sm"
               >
-                Find a Pet to Adopt
+                🐾 Adopt a Pet
               </Link>
-              <Link 
-                to="/report" 
-                className="px-10 py-5 bg-white hover:bg-gray-50 text-blue-600 font-bold border-2 border-blue-600 rounded-2xl transition-all transform hover:-translate-y-1 active:scale-95"
+              <Link
+                to={user ? '/create-report' : '/login'}
+                className="px-8 py-3.5 bg-white/20 text-white font-bold rounded-full hover:bg-white/30 transition-all border border-white/30 text-sm"
               >
-                Report a Lost Pet
+                📢 Report a Pet
               </Link>
             </div>
           </div>
         </div>
+
+        {/* Wave divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 60L1440 60L1440 30C1440 30 1200 0 720 0C240 0 0 30 0 30L0 60Z" fill="#FFFBF5" />
+          </svg>
+        </div>
       </section>
 
-      {/* Feature Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-black text-gray-900 mb-4">How We Can Help</h2>
-            <div className="h-1.5 w-20 bg-blue-600 mx-auto rounded-full"></div>
+      {/* ===== Features Section ===== */}
+      <section className="section-padding bg-cream">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-black text-slate-800 mb-3">
+              How We <span className="text-orange-500">Help</span>
+            </h2>
+            <p className="text-slate-500 max-w-lg mx-auto">
+              Our platform connects pet lovers with animals in need through these key features.
+            </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Adoption Card */}
-            <div className="group bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm transition-all hover:shadow-2xl hover:shadow-blue-100 hover:-translate-y-2">
-              <div className="h-16 w-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mb-8 group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Feature 1 */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-orange-50 text-center card-hover">
+              <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                🏠
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Pet Adoption</h3>
-              <p className="text-gray-600 mb-8 leading-relaxed">
-                Browse through our list of lovable pets waiting for their forever homes. Every adoption saves a life and brings joy to a family.
+              <h3 className="font-bold text-slate-800 mb-2">Pet Adoption</h3>
+              <p className="text-sm text-slate-500">
+                Browse available pets and find your perfect companion to bring home.
               </p>
-              <Link to="/adoption" className="inline-flex items-center text-blue-600 font-bold hover:translate-x-2 transition-transform">
-                Browse Pets 
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-              </Link>
             </div>
 
-            {/* Rescue Card */}
-            <div className="group bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm transition-all hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-2">
-              <div className="h-16 w-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-8 group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+            {/* Feature 2 */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-orange-50 text-center card-hover">
+              <div className="w-14 h-14 bg-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                🔍
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Rescue Reports</h3>
-              <p className="text-gray-600 mb-8 leading-relaxed">
-                Found a lost pet? Or looking for your own? Create a report and let our community help in the search and rescue efforts.
+              <h3 className="font-bold text-slate-800 mb-2">Lost & Found</h3>
+              <p className="text-sm text-slate-500">
+                Report lost or found pets and help reunite them with their families.
               </p>
-              <Link to="/rescue" className="inline-flex items-center text-indigo-600 font-bold hover:translate-x-2 transition-transform">
-                View Reports
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-              </Link>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-orange-50 text-center card-hover">
+              <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                🤝
+              </div>
+              <h3 className="font-bold text-slate-800 mb-2">Smart Matching</h3>
+              <p className="text-sm text-slate-500">
+                Our system automatically matches lost pets with found reports.
+              </p>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-orange-50 text-center card-hover">
+              <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                🔔
+              </div>
+              <h3 className="font-bold text-slate-800 mb-2">Notifications</h3>
+              <p className="text-sm text-slate-500">
+                Get notified about new pets, report updates, and potential matches.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-gray-900 rounded-[4rem] mx-4 mb-12">
-        <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-4xl font-black text-white mb-8">Ready to Make a Difference?</h2>
-          <p className="text-gray-400 text-lg mb-12 leading-relaxed">
-            Whether you're adopting, reporting, or just spreading the word, every action helps build a safer world for our furry friends.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link to="/register" className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all">
-              Join Our Community
-            </Link>
-            <Link to="/about" className="bg-white/10 text-white px-8 py-4 rounded-xl font-bold hover:bg-white/20 transition-all backdrop-blur-sm">
-              Learn More
-            </Link>
+      {/* ===== Featured Pets Section ===== */}
+      {user && featuredPets.length > 0 && (
+        <section className="section-padding bg-orange-50/50">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-black text-slate-800">
+                  Featured <span className="text-orange-500">Pets</span>
+                </h2>
+                <p className="text-slate-500 mt-1">Meet some of the amazing pets looking for a home</p>
+              </div>
+              <Link
+                to="/adoption"
+                className="hidden sm:inline-flex items-center gap-1 text-sm font-bold text-orange-600 hover:text-orange-700"
+              >
+                View All →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredPets.map((pet) => (
+                <PetCard key={pet.id} pet={pet} />
+              ))}
+            </div>
+
+            <div className="sm:hidden text-center mt-6">
+              <Link
+                to="/adoption"
+                className="text-sm font-bold text-orange-600 hover:text-orange-700"
+              >
+                View All Pets →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ===== How It Works ===== */}
+      <section className="section-padding bg-cream">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-black text-slate-800 mb-3">
+              How It <span className="text-orange-500">Works</span>
+            </h2>
+            <p className="text-slate-500 max-w-lg mx-auto">
+              Getting started is easy — just follow these three simple steps.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black shadow-lg shadow-orange-500/30">
+                1
+              </div>
+              <h3 className="font-bold text-slate-800 mb-2">Create an Account</h3>
+              <p className="text-sm text-slate-500">
+                Sign up for free and join our community of pet lovers.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-amber-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black shadow-lg shadow-amber-500/30">
+                2
+              </div>
+              <h3 className="font-bold text-slate-800 mb-2">Browse or Report</h3>
+              <p className="text-sm text-slate-500">
+                Browse available pets for adoption or report a lost/found pet.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-teal-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black shadow-lg shadow-teal-500/30">
+                3
+              </div>
+              <h3 className="font-bold text-slate-800 mb-2">Connect & Adopt</h3>
+              <p className="text-sm text-slate-500">
+                Get matched with the perfect pet or reunite lost pets with owners.
+              </p>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* ===== CTA Section ===== */}
+      {!user && (
+        <section className="bg-gradient-to-r from-slate-800 to-slate-900 text-white section-padding">
+          <div className="max-w-7xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-black mb-4">
+              Ready to Make a <span className="text-orange-400">Difference</span>?
+            </h2>
+            <p className="text-slate-300 mb-8 max-w-lg mx-auto">
+              Join thousands of pet lovers who are helping animals find their forever homes.
+            </p>
+            <Link
+              to="/register"
+              className="inline-block px-8 py-3.5 bg-orange-500 text-white font-bold rounded-full hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/30 text-sm"
+            >
+              Get Started — It's Free
+            </Link>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

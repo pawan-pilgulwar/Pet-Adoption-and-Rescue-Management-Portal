@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Notification
 from users.serializer import UserReadSerializer
-from pets.serializer import PetSerializer
+from adoptions.serializer import PetSerializer
 from reports.serializer import PetReportSerializer
 
 class NotificationSerializer(serializers.ModelSerializer):

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import PetReport
-from pets.models import Pet
-from pets.serializer import PetSerializer
+from adoptions.models import Pet
+from adoptions.serializer import PetSerializer
 
 
 class PetReportSerializer(serializers.ModelSerializer):
