@@ -82,25 +82,25 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
             status_code=status.HTTP_200_OK
         )
 
+        is_production = os.getenv('ENVIRONMENT') != 'development'
+
         response.set_cookie(
             key="access_token",
-            value = serializer.validated_data['access'],
+            value=serializer.validated_data['access'],
             httponly=True,
-            secure=os.getenv('ENVIRONMENT')!='development',
-            samesite="None",
+            secure=is_production,
+            samesite="None" if is_production else "Lax",
             max_age=3600
         )
 
         response.set_cookie(
             key="refresh_token",
-            value = serializer.validated_data['refresh'],
+            value=serializer.validated_data['refresh'],
             httponly=True,
-            secure=os.getenv('ENVIRONMENT')!='development',
-            samesite="None",
+            secure=is_production,
+            samesite="None" if is_production else "Lax",
             max_age=86400
         )
-
-        print(response.cookies)
 
         return response
         

@@ -14,8 +14,8 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   login: async () => ({ success: false }),
-  logout: () => {},
-  refreshUser: async () => {},
+  logout: () => { },
+  refreshUser: async () => { },
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -43,8 +43,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const response = await api.post('/users/login/', { email, password });
-
       const loginData = response.data.data;
+
+      console.log(response);
       if (loginData) {
         await refreshUser();
         setIsLoading(false);
