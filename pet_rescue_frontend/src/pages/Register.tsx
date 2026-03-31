@@ -10,7 +10,10 @@ const Register: React.FC = () => {
     email: '',
     first_name: '',
     last_name: '',
-    password: ''
+    password: '',
+    phone_number: '',
+    address: '',
+    profile_picture: null as File | null,
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -19,7 +22,12 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, files } = e.target;
+    if (name === 'profile_picture' && files && files[0]) {
+      setFormData({ ...formData, profile_picture: files[0] });
+      return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -28,7 +36,22 @@ const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      await api.post('/users/register/', formData);
+      const fm = new FormData();
+      fm.append('username', formData.username);
+      fm.append('email', formData.email);
+      fm.append('first_name', formData.first_name);
+      fm.append('last_name', formData.last_name);
+      fm.append('password', formData.password);
+      fm.append('phone_number', formData.phone_number);
+      fm.append('address', formData.address);
+      if (formData.profile_picture) {
+        fm.append('profile_picture', formData.profile_picture);
+      }
+
+      await api.post('/users/register/', fm, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
       setSuccess(true);
       setTimeout(() => navigate('/login'), 2000);
     } catch (err: any) {
@@ -76,6 +99,9 @@ const Register: React.FC = () => {
             </div>
             <Input label="Username" name="username" required value={formData.username} onChange={handleChange} />
             <Input label="Email Address" type="email" name="email" required value={formData.email} onChange={handleChange} />
+            <Input label="Phone Number" name="phone_number" value={formData.phone_number} onChange={handleChange} />
+            <Input label="Address" name="address" value={formData.address} onChange={handleChange} />
+            <Input label="Profile Picture" type="file" name="profile_picture" onChange={handleChange} />
             <Input label="Password" type="password" name="password" required value={formData.password} onChange={handleChange} />
 
             <Button className="w-full mt-2" type="submit" disabled={loading}>

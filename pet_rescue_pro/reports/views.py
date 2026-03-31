@@ -67,7 +67,7 @@ class PetReportViewSet(viewsets.ModelViewSet, ResponseMixin):
         )
     
     # Generate the report
-    @action(detail=False, methods=['post'], url_path='create-report', permission_classes=[IsAuthenticated , IsUser])
+    @action(detail=False, methods=['post'], url_path='create-report', permission_classes=[IsAuthenticated])
     def create_report(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

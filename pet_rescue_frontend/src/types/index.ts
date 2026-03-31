@@ -16,6 +16,11 @@ export interface Pet {
   pet_type: string;
   breed: string;
   color: string;
+  age?: number;
+  gender?: string;
+  size?: string;
+  description?: string;
+  vaccination_status?: string;
   status: string;
   image?: string;
   created_at: string;
@@ -23,30 +28,45 @@ export interface Pet {
 }
 
 export interface PetReportPetData {
-  name: string;
-  pet_type: string;
-  breed: string;
-  color: string;
-  status: string;
+  id?: number;
+  name?: string;
+  pet_type?: string;
+  breed?: string;
+  color?: string;
+  age?: number;
+  gender?: string;
+  size?: string;
+  description?: string;
+  status?: string;
   image?: string | null;
 }
 
 export interface PetReport {
   id: number;
   pet_data: PetReportPetData;
-  // Keep flat versions for backward compatibility
+  report_type: 'Lost' | 'Found';
   pet_name: string;
   pet_type: string;
   pet_breed: string;
   pet_color: string;
+  pet_age?: number;
+  pet_gender?: string;
+  pet_size?: string;
   pet_status: 'Lost' | 'Found';
   pet_image?: string;
   location: string;
+  user_contact?: {
+    email: string;
+    phone?: string;
+    address?: string;
+  };
   description: string;
-  status: 'Pending' | 'Accepted' | 'Rejected';
+  report_status: 'Pending' | 'Accepted' | 'Rejected' | 'Closed';
+  status: 'Pending' | 'Accepted' | 'Rejected' | 'Closed';
   admin_comment?: string;
   user: number;
   user_detail?: string;
+  date_reported?: string;
   created_at: string;
   reviewed_at?: string;
 }

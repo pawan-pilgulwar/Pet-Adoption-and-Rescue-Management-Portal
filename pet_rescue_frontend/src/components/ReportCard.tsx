@@ -1,5 +1,6 @@
 import React from 'react';
 import { PetReport } from '../types';
+import { MEDIA_BASE_URL } from '../services/api';
 
 interface ReportCardProps {
   report: PetReport;
@@ -14,7 +15,7 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, children }) => {
   const petImage = report.pet_data?.image || report.pet_image;
 
   const imageUrl = petImage
-    ? petImage
+    ? `${MEDIA_BASE_URL}${petImage}`
     : 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=70';
 
   return (
@@ -53,9 +54,25 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, children }) => {
           </span>
         </div>
 
-        <p className="text-sm text-slate-500 flex items-center gap-1 mb-1">
-          <span>📍</span> {report.location}
-        </p>
+        <div className="space-y-1 text-sm text-slate-500 mb-3">
+          <p className="flex items-center gap-1">
+            <span>📍</span> {report.location}
+          </p>
+          <p className="flex items-center gap-1">
+            <span>📝</span> {report.report_type}
+          </p>
+          {report.user_contact && (
+            <p className="flex items-center gap-1">
+              <span>📞</span> {report.user_contact.phone || report.user_contact.email}
+            </p>
+          )}
+          {report.pet_age && (
+            <p className="flex items-center gap-1">
+              <span>🐾</span> Age: {report.pet_age} • Gender: {report.pet_gender || '—'} • Size: {report.pet_size || '—'}
+            </p>
+          )}
+        </div>
+
         <p className="text-sm text-slate-400 line-clamp-2">
           {report.description || 'No additional details provided.'}
         </p>

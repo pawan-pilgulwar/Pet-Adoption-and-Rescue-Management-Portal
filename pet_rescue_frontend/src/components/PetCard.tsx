@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pet } from '../types';
+import { MEDIA_BASE_URL } from '../services/api';
 
 interface PetCardProps {
   pet: Pet;
@@ -8,7 +9,7 @@ interface PetCardProps {
 
 const PetCard: React.FC<PetCardProps> = ({ pet, children }) => {
   const imageUrl = pet.image
-    ? pet.image
+    ? `${MEDIA_BASE_URL}${pet.image}`
     : 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=800&q=70';
   const breed = pet.breed ? pet.breed : 'Unknown';
   const color = pet.color ? pet.color : 'Unknown';
@@ -39,9 +40,18 @@ const PetCard: React.FC<PetCardProps> = ({ pet, children }) => {
             {pet.status}
           </span>
         </div>
-        <p className="text-sm text-slate-500 mb-3">
-          Breed: {breed} • Color: {color}
+        <p className="text-sm text-slate-500 mb-2">
+          Breed: {breed} • Color: {color} • Age: {pet.age ?? '—'}
         </p>
+        <p className="text-sm text-slate-500 mb-2">
+          Gender: {pet.gender || '—'} • Size: {pet.size || '—'}
+        </p>
+        {pet.vaccination_status && (
+          <p className="text-sm text-emerald-600 mb-2">Vaccination: {pet.vaccination_status}</p>
+        )}
+        {pet.description && (
+          <p className="text-sm text-slate-400 mb-3 line-clamp-2">{pet.description}</p>
+        )}
         <div className="space-y-2">{children}</div>
       </div>
     </article>

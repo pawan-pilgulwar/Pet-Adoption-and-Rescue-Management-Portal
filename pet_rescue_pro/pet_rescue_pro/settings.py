@@ -85,23 +85,23 @@ WSGI_APPLICATION = 'pet_rescue_pro.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'pet_rescue_pro'),
-        'USER': os.getenv('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),  # Or the IP address of your PostgreSQL server
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),        # Or the port your PostgreSQL server is listening on
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('POSTGRES_DB', 'pet_rescue_pro'),
+#         'USER': os.getenv('POSTGRES_USER', 'postgres'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+#         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),  # Or the IP address of your PostgreSQL server
+#         'PORT': os.getenv('POSTGRES_PORT', '5432'),        # Or the port your PostgreSQL server is listening on
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 
 # Password validation

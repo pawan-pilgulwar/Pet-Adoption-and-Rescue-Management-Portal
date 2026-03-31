@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { PetReport } from '../types';
 import ReportCard from '../components/ReportCard';
 
 const RescuePage: React.FC = () => {
+  const { user } = useAuth();
   const [reports, setReports] = useState<PetReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchType, setSearchType] = useState('');
@@ -58,9 +61,19 @@ const RescuePage: React.FC = () => {
       {/* Page Header */}
       <section className="bg-gradient-to-r from-teal-500 to-teal-600 py-12 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-3xl md:text-4xl font-black text-white mb-2">
-            🔍 Lost & Found Pets
-          </h1>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
+            <h1 className="text-3xl md:text-4xl font-black text-white">
+              🔍 Lost & Found Pets
+            </h1>
+            {user && user.role !== 'Admin' ? (
+              <Link
+                to="/create-report"
+                className="px-4 py-2 text-sm font-bold rounded-xl bg-white text-teal-600 hover:bg-teal-100"
+              >
+                ➕ Report Pet
+              </Link>
+            ) : null}
+          </div>
           <p className="text-white/80 max-w-lg mx-auto">
             Browse community rescue reports. Help reunite lost pets with their loving families.
           </p>

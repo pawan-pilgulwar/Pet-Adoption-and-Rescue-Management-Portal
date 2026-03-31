@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import { MEDIA_BASE_URL } from '../services/api';
 
 const ProfilePage: React.FC = () => {
   const { user, refreshUser } = useAuth();
@@ -13,6 +14,7 @@ const ProfilePage: React.FC = () => {
     last_name: user?.last_name || '',
     phone_number: user?.phone_number || '',
     address: user?.address || '',
+    profile_picture: null as File | null,
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -27,14 +29,31 @@ const ProfilePage: React.FC = () => {
   const [savingPassword, setSavingPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, files } = e.target;
+    if (name === 'profile_picture' && files && files[0]) {
+      setFormData({ ...formData, profile_picture: files[0] });
+      return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSave = async () => {
     setSaving(true);
     setMessage('');
     try {
-      await api.patch(`/users/${user?.id}/update-user/`, formData);
+      const fm = new FormData();
+      fm.append('first_name', formData.first_name);
+      fm.append('last_name', formData.last_name);
+      fm.append('phone_number', formData.phone_number);
+      fm.append('address', formData.address);
+      if (formData.profile_picture) {
+        fm.append('profile_picture', formData.profile_picture);
+      }
+
+      await api.patch(`/users/${user?.id}/update-user/`, fm, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
       await refreshUser();
       setEditMode(false);
       setMessage('Profile updated successfully!');
@@ -70,8 +89,14 @@ const ProfilePage: React.FC = () => {
       {/* Profile Info Card */}
       <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-orange-50 mb-6">
         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-orange-50">
-          <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-2xl font-black text-orange-600">
-            {user.first_name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase()}
+          <div className="w-16 h-16 rounded-full overflow-hidden bg-orange-100 border border-orange-200">
+            {user.profile_picture ? (
+              <img src={`${MEDIA_BASE_URL}${user.profile_picture}`} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-2xl font-black text-orange-600">
+                {user.first_name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase()}
+              </div>
+            )}
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-800">
@@ -100,6 +125,7 @@ const ProfilePage: React.FC = () => {
             </div>
             <Input label="Phone Number" name="phone_number" value={formData.phone_number} onChange={handleChange} />
             <Input label="Address" name="address" value={formData.address} onChange={handleChange} />
+            <Input label="Profile Picture" type="file" name="profile_picture" onChange={handleChange} />
             <div className="flex gap-3 pt-2">
               <Button onClick={handleSave} disabled={saving}>
                 {saving ? 'Saving...' : 'Save Changes'}

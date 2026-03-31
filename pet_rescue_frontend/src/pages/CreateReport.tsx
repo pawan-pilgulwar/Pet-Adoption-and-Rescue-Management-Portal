@@ -10,9 +10,13 @@ const CreateReport: React.FC = () => {
     pet_type: '',
     pet_breed: '',
     pet_color: '',
-    pet_status: 'Lost',
+    pet_age: '',
+    pet_gender: '',
+    pet_size: '',
+    report_type: 'Lost',
     location: '',
     description: '',
+    pet_image: null as File | null,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,6 +24,10 @@ const CreateReport: React.FC = () => {
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    if (e.target instanceof HTMLInputElement && e.target.type === 'file' && e.target.files?.[0]) {
+      setFormData({ ...formData, pet_image: e.target.files[0] });
+      return;
+    }
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -29,17 +37,26 @@ const CreateReport: React.FC = () => {
     setError('');
 
     try {
-      await api.post('/reports/create-report/', {
-        pet_data: {
-          name: formData.pet_name,
-          pet_type: formData.pet_type,
-          breed: formData.pet_breed,
-          color: formData.pet_color,
-          status: formData.pet_status,
-        },
-        location: formData.location,
-        description: formData.description,
+      const fm = new FormData();
+      fm.append('report_type', formData.report_type);
+      fm.append('pet_name', formData.pet_name);
+      fm.append('pet_type', formData.pet_type);
+      fm.append('pet_breed', formData.pet_breed);
+      fm.append('pet_color', formData.pet_color);
+      if (formData.pet_age) fm.append('pet_age', formData.pet_age);
+      if (formData.pet_gender) fm.append('pet_gender', formData.pet_gender);
+      if (formData.pet_size) fm.append('pet_size', formData.pet_size);
+      fm.append('pet_status', formData.report_type);
+      fm.append('location', formData.location);
+      fm.append('description', formData.description);
+      if (formData.pet_image) {
+        fm.append('pet_image', formData.pet_image);
+      }
+
+      await api.post('/reports/create-report/', fm, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
+
       navigate('/dashboard');
     } catch (err: any) {
       console.error(err);
@@ -68,13 +85,13 @@ const CreateReport: React.FC = () => {
           <div className="flex flex-col">
             <label className="mb-1.5 text-sm font-bold text-slate-700">Report Type</label>
             <select
-              name="pet_status"
+              name="report_type"
               className="px-4 py-2.5 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-              value={formData.pet_status}
+              value={formData.report_type}
               onChange={handleChange}
             >
-              <option value="Lost">🔍 Lost (Looking for my pet)</option>
-              <option value="Found">✅ Found (Found someone's pet)</option>
+              <option value="Lost">🔍 Lost</option>
+              <option value="Found">✅ Found</option>
             </select>
           </div>
         </div>
@@ -83,6 +100,9 @@ const CreateReport: React.FC = () => {
           <Input label="Pet Type" placeholder="Dog, Cat, etc." name="pet_type" required value={formData.pet_type} onChange={handleChange} />
           <Input label="Breed" name="pet_breed" placeholder="Optional" value={formData.pet_breed} onChange={handleChange} />
           <Input label="Color" name="pet_color" placeholder="Optional" value={formData.pet_color} onChange={handleChange} />
+          <Input label="Age" type="number" name="pet_age" placeholder="Optional" value={formData.pet_age} onChange={handleChange} />
+          <Input label="Gender" name="pet_gender" placeholder="Optional" value={formData.pet_gender} onChange={handleChange} />
+          <Input label="Size" name="pet_size" placeholder="Optional" value={formData.pet_size} onChange={handleChange} />
           <Input label="Location" name="location" placeholder="Last seen / found location" required value={formData.location} onChange={handleChange} />
         </div>
 
@@ -96,6 +116,17 @@ const CreateReport: React.FC = () => {
             value={formData.description}
             onChange={handleChange}
             placeholder="Provide any additional details about the pet..."
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="mb-1.5 text-sm font-bold text-slate-700">Pet Image</label>
+          <input
+            type="file"
+            name="pet_image"
+            accept="image/*"
+            onChange={handleChange}
+            className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm"
           />
         </div>
 
