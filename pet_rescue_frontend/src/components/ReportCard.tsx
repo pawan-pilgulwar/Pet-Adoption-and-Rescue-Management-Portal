@@ -1,6 +1,6 @@
 import React from 'react';
 import { PetReport } from '../types';
-import { MEDIA_BASE_URL } from '../services/api';
+import { formatImageUrl } from '../services/api';
 
 interface ReportCardProps {
   report: PetReport;
@@ -14,9 +14,7 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, children }) => {
   const petStatus = report.pet_data?.status || report.pet_status || 'Lost';
   const petImage = report.pet_data?.image || report.pet_image;
 
-  const imageUrl = petImage
-    ? `${MEDIA_BASE_URL}${petImage}`
-    : 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=70';
+  const imageUrl = formatImageUrl(petImage, 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=70');
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-md border border-orange-50 card-hover">

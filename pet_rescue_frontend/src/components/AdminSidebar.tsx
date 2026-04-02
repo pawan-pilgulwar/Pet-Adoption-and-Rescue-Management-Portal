@@ -10,7 +10,7 @@ const AdminSidebar: React.FC = () => {
     }`;
 
   return (
-    <aside className="w-72 bg-cream min-h-[calc(100vh-72px)] flex-col hidden lg:flex border-r border-orange-100/50">
+    <aside className="w-72 bg-cream h-[calc(100vh-64px)] sticky top-16 flex-col hidden lg:flex border-r border-orange-100/50">
       <div className="p-8 pb-4">
         <h2 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1">
           Navigation

@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Input from '../components/Input';
 import Button from '../components/Button';
-import { MEDIA_BASE_URL } from '../services/api';
+import { formatImageUrl } from '../services/api';
 
 const ProfilePage: React.FC = () => {
   const { user, refreshUser } = useAuth();
@@ -91,7 +91,7 @@ const ProfilePage: React.FC = () => {
         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-orange-50">
           <div className="w-16 h-16 rounded-full overflow-hidden bg-orange-100 border border-orange-200">
             {user.profile_picture ? (
-              <img src={`${MEDIA_BASE_URL}${user.profile_picture}`} alt="Profile" className="w-full h-full object-cover" />
+              <img src={formatImageUrl(user.profile_picture)} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-2xl font-black text-orange-600">
                 {user.first_name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase()}

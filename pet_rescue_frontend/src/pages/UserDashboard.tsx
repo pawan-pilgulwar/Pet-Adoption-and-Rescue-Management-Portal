@@ -47,9 +47,6 @@ const UserDashboard: React.FC = () => {
             <p className="text-white/80 mt-1">Manage your pet reports and profile from here.</p>
           </div>
           <div className="flex gap-3">
-            <Link to="/profile">
-              <Button variant="secondary">My Profile</Button>
-            </Link>
             <Link to="/create-report">
               <button className="px-5 py-2.5 bg-white text-orange-600 font-bold rounded-xl text-sm hover:bg-orange-50 transition-colors shadow-md">
                 File a Report

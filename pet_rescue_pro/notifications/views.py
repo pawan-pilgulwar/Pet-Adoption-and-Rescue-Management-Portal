@@ -52,18 +52,16 @@ class NotificationViewSet(viewsets.ModelViewSet, ResponseMixin):
             status_code = status.HTTP_200_OK
         )
 
-    @action(detail=False, methods=['get'], url_path='get-unread-notifications', permission_classes=[IsAuthenticated])
-    def get_unread_notifications(self, request, *args, **kwargs):
+    @action(detail=False, methods=['patch', 'get'], url_path='mark-all-as-read', permission_classes=[IsAuthenticated])
+    def mark_all_as_read(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(is_read=False)
-        serializer = self.get_serializer(queryset, many=True)
+        queryset.update(is_read=True)
         return self.success_response(
-            data={
-                "Count": queryset.count(),
-                "Notifications": serializer.data
-            },
-            message="Unread Notifications fetched successfully",
+            message="All notifications marked as read",
             status_code = status.HTTP_200_OK
-            )
+        )
+
+    @action(detail=False, methods=['get'], url_path='get-unread-notifications', permission_classes=[IsAuthenticated])
 
     @action(detail=True, methods=['delete'], url_path='delete-notification', permission_classes=[IsAuthenticated])
     def delete_notification(self, request, *args, **kwargs):

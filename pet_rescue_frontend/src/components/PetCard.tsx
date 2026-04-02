@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pet } from '../types';
-import { MEDIA_BASE_URL } from '../services/api';
+import { formatImageUrl } from '../services/api';
 
 interface PetCardProps {
   pet: Pet;
@@ -8,9 +8,7 @@ interface PetCardProps {
 }
 
 const PetCard: React.FC<PetCardProps> = ({ pet, children }) => {
-  const imageUrl = pet.image
-    ? `${MEDIA_BASE_URL}${pet.image}`
-    : 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=800&q=70';
+  const imageUrl = formatImageUrl(pet.image);
   const breed = pet.breed ? pet.breed : 'Unknown';
   const color = pet.color ? pet.color : 'Unknown';
 
