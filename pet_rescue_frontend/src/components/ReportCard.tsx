@@ -19,11 +19,11 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, children }) => {
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-md border border-orange-50 card-hover">
       {/* Image */}
-      <div className="relative h-52 overflow-hidden bg-orange-50">
+      <div className="relative h-64 overflow-hidden bg-slate-50 flex items-center justify-center p-2">
         <img
           src={imageUrl}
           alt={petName}
-          className="h-full w-full object-cover object-center transition-transform duration-500 hover:scale-110"
+          className="max-h-full max-w-full object-contain transition-transform duration-500 hover:scale-105"
         />
         <span className={`absolute top-3 right-3 text-xs font-bold px-3 py-1 rounded-full shadow-sm ${
           petStatus === 'Found'
@@ -36,11 +36,8 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, children }) => {
 
       {/* Content */}
       <div className="p-5">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <div>
-            <h3 className="text-lg font-black text-slate-800">{petName}</h3>
-            <p className="text-sm text-slate-500">Type: {petType}</p>
-          </div>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-black text-slate-800">{petName}</h3>
           <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${
             report.status === 'Accepted'
               ? 'bg-teal-50 text-teal-600'
@@ -52,21 +49,20 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, children }) => {
           </span>
         </div>
 
+        <p className="text-sm font-bold text-orange-600 mb-2">
+          {report.report_type} • Type: {petType}
+        </p>
+
         <div className="space-y-1 text-sm text-slate-500 mb-3">
           <p className="flex items-center gap-1">
-            <span>📍</span> {report.location}
+            <span className="text-orange-400">📍</span> {report.location}
           </p>
           <p className="flex items-center gap-1">
-            <span>📝</span> {report.report_type}
+            <span className="text-orange-400">🐾</span> Age: {report.pet_age || '—'} • {report.pet_gender || '—'} Gender • {report.pet_size || '—'} Size
           </p>
           {report.user_contact && (
             <p className="flex items-center gap-1">
-              <span>📞</span> {report.user_contact.phone || report.user_contact.email}
-            </p>
-          )}
-          {report.pet_age && (
-            <p className="flex items-center gap-1">
-              <span>🐾</span> Age: {report.pet_age} • Gender: {report.pet_gender || '—'} • Size: {report.pet_size || '—'}
+              <span className="text-orange-400">📞</span> {report.user_contact.phone || report.user_contact.email}
             </p>
           )}
         </div>

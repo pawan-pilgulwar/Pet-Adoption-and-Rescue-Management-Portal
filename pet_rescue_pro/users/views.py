@@ -194,10 +194,35 @@ class UserViewSet(viewsets.ModelViewSet, ResponseMixin):
         total_reports = PetReport.objects.count()
         total_pets = Pet.objects.count()
 
+        # Detailed Stats
+        pending_reports = PetReport.objects.filter(status="Pending").count()
+        accepted_reports = PetReport.objects.filter(status="Accepted").count()
+        rejected_reports = PetReport.objects.filter(status="Rejected").count()
+
+        # Recent Activity
+        recent_reports = PetReport.objects.order_by('-created_at')[:5]
+        recent_users = User.objects.filter(role="User").order_by('-created_at')[:5]
+
+        # Serialization for recent items
+        from reports.serializer import PetReportSerializer
+        from .serializer import UserReadSerializer
+
+        report_serializer = PetReportSerializer(recent_reports, many=True, context={'request': request})
+        user_serializer = UserReadSerializer(recent_users, many=True, context={'request': request})
+
         data = {
             "total_users": total_users,
             "total_reports": total_reports,
             "total_pets": total_pets,
+            "report_stats": {
+                "pending": pending_reports,
+                "accepted": accepted_reports,
+                "rejected": rejected_reports
+            },
+            "recent_activity": {
+                "reports": report_serializer.data,
+                "users": user_serializer.data
+            }
         }
 
         return self.success_response(

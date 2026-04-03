@@ -61,7 +61,7 @@ const ManageReports: React.FC = () => {
           <p className="mt-4 text-slate-500 font-bold">No reports found.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reports.map((report) => (
             <ReportCard key={report.id} report={report}>
               {report.status === 'Pending' ? (

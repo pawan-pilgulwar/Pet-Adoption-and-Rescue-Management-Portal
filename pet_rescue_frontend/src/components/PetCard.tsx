@@ -15,11 +15,11 @@ const PetCard: React.FC<PetCardProps> = ({ pet, children }) => {
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-md border border-orange-50 card-hover">
       {/* Image */}
-      <div className="relative h-52 overflow-hidden bg-orange-50">
+      <div className="relative h-64 overflow-hidden bg-slate-50 flex items-center justify-center p-2">
         <img
           src={imageUrl}
           alt={pet.name}
-          className="h-full w-full object-cover object-center transition-transform duration-500 hover:scale-110"
+          className="max-h-full max-w-full object-contain transition-transform duration-500 hover:scale-105"
         />
         <span className="absolute top-3 right-3 text-xs font-bold text-white bg-orange-500 px-3 py-1 rounded-full shadow-sm">
           {pet.pet_type}
