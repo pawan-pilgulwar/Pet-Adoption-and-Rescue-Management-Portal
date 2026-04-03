@@ -78,10 +78,9 @@ const Navbar: React.FC = () => {
   };
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `px-3 py-2 rounded-lg text-sm font-bold transition-colors duration-200 ${
-      isActive
-        ? 'text-orange-600 bg-orange-50'
-        : 'text-slate-700 hover:text-orange-600 hover:bg-orange-50'
+    `px-3 py-2 rounded-lg text-sm font-bold transition-colors duration-200 ${isActive
+      ? 'text-orange-600 bg-orange-50'
+      : 'text-slate-700 hover:text-orange-600 hover:bg-orange-50'
     }`;
 
   return (
@@ -146,11 +145,10 @@ const Navbar: React.FC = () => {
                         notifications.map((item) => (
                           <div
                             key={item.id}
-                            className={`p-3 rounded-xl transition-colors border ${
-                              item.is_read 
-                                ? 'bg-white border-transparent' 
-                                : 'bg-white border-orange-100 shadow-sm'
-                            }`}
+                            className={`p-3 rounded-xl transition-colors border ${item.is_read
+                              ? 'bg-white border-transparent'
+                              : 'bg-white border-orange-100 shadow-sm'
+                              }`}
                           >
                             <div className="flex items-start gap-2">
                               {!item.is_read && <span className="w-2 h-2 rounded-full bg-orange-500 mt-1.5 shrink-0" />}
@@ -188,20 +186,20 @@ const Navbar: React.FC = () => {
                 >
                   <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-black overflow-hidden border-2 border-white shadow-sm">
                     {user.profile_picture ? (
-                       <img src={formatImageUrl(user.profile_picture)} alt="" className="w-full h-full object-cover" />
+                      <img src={formatImageUrl(user.profile_picture)} alt="" className="w-full h-full object-cover" />
                     ) : (
                       user.first_name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase()
                     )}
                   </div>
-                  <span className="text-sm font-bold text-slate-700">Account</span>
+                  <span className="text-sm font-bold text-slate-700">{user.username}</span>
                   <span className={`text-[10px] transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`}>▼</span>
                 </button>
 
                 {profileDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 z-50 bg-white rounded-2xl shadow-xl border border-orange-100 animate-fade-in py-2 overflow-hidden">
                     <div className="px-4 py-2 border-b border-orange-50 mb-1">
-                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Logged in as</p>
-                       <p className="text-sm font-black text-slate-800 truncate">{user.first_name || user.username}</p>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Logged in as</p>
+                      <p className="text-sm font-black text-slate-800 truncate">{user.first_name} {user.last_name}</p>
                     </div>
                     <Link
                       to="/profile"
