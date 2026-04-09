@@ -11,6 +11,7 @@ const Register: React.FC = () => {
     first_name: '',
     last_name: '',
     password: '',
+    confirmPassword: '',
     phone_number: '',
     address: '',
     profile_picture: null as File | null,
@@ -46,6 +47,11 @@ const Register: React.FC = () => {
       fm.append('address', formData.address);
       if (formData.profile_picture) {
         fm.append('profile_picture', formData.profile_picture);
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        return;
       }
 
       await api.post('/users/register/', fm, {
@@ -103,6 +109,7 @@ const Register: React.FC = () => {
             <Input label="Address" name="address" value={formData.address} onChange={handleChange} />
             <Input label="Profile Picture" type="file" name="profile_picture" onChange={handleChange} />
             <Input label="Password" type="password" name="password" required value={formData.password} onChange={handleChange} />
+            <Input label="Confirm Password" type="password" name="confirmPassword" required value={formData.confirmPassword} onChange={handleChange} />
 
             <Button className="w-full mt-2" type="submit" disabled={loading}>
               {loading ? 'Creating account...' : 'Create Account'}

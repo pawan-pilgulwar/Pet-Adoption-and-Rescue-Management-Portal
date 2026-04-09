@@ -49,3 +49,10 @@ htmlcov/
 # Django migrations
 */migrations/*.pyc
 */migrations/__pycache__/
+
+# Media
+*/media/*
+*/static/*
+
+# Node
+*/node_modules/*
